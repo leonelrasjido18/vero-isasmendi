@@ -84,7 +84,7 @@ export default function Landing() {
               <span className="hero-tag">Definición</span>
             </div>
             <div className="hero-actions">
-              <a href="https://wa.me/5493815555555" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg">
+              <a href="https://wa.me/5493875342706" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg">
                 💬 Escribime
               </a>
               <button className="btn btn-secondary btn-lg" onClick={handleLogin}>
@@ -288,7 +288,7 @@ export default function Landing() {
             <h2 className="text-display cta-title">¿Lista para empezar tu <span className="text-gradient">transformación</span>?</h2>
             <p className="cta-text">Escribime y empezamos juntas.</p>
             <div className="cta-buttons">
-              <a href="https://wa.me/5493815555555" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg">💬 WhatsApp</a>
+              <a href="https://wa.me/5493875342706" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg">💬 WhatsApp</a>
               <button className="btn btn-secondary btn-lg" onClick={handleLogin}>{user ? 'Mi Panel' : 'Acceso Alumnos'}</button>
             </div>
           </div>
@@ -306,7 +306,7 @@ export default function Landing() {
           <div className="footer-links">
             <a href="https://instagram.com/vero_isasmendiok" target="_blank" rel="noopener noreferrer">Instagram</a>
             <span>·</span>
-            <a href="https://wa.me/5493815555555" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a href="https://wa.me/5493875342706" target="_blank" rel="noopener noreferrer">WhatsApp</a>
             <span>·</span>
             <button className="footer-link-btn" onClick={handleLogin}>Acceso Alumnos</button>
           </div>
