@@ -1,0 +1,16 @@
+# ===== Dependencias =====
+node_modules/
+
+# ===== Base de datos (subir solo una vez) =====
+backend/database.sqlite-shm
+backend/database.sqlite-wal
+
+# ===== Variables de entorno (crear en el VPS manualmente) =====
+backend/.env
+
+# ===== Build del frontend (se genera en el VPS) =====
+frontend/dist/
+
+# ===== Logs =====
+*.log
+logs/

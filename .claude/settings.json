@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx agent-browser:*)",
+      "Bash(node_modules/.bin/agent-browser --version)",
+      "Bash(node -e ':*)",
+      "Bash(ls -lh \"d:/Vero isasmendi/frontend/public/instagram/gym\"*)",
+      "Read(//c/Users/leone/.agent-browser/tmp/screenshots/**)",
+      "Bash(npx kill-port:*)",
+      "Bash(node server.js)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(netstat -ano)",
+      "Bash(node generate-icons.mjs)"
+    ]
+  }
+}
