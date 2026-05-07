@@ -86,8 +86,9 @@ export default function StudentPanel() {
   const hasContent = (date) => {
     if (!date) return false;
     const dStr = formatDate(date);
-    return allRoutines.some(r => r.date === dStr) ||
-           allMeals.some(m => m.date === dStr);
+    const dIdx = jsDayToIndex(date.getDay());
+    return allRoutines.some(r => r.date === dStr || (r.date === null && r.day_of_week === dIdx)) ||
+           allMeals.some(m => m.date === dStr || (m.date === null && m.day_of_week === dIdx));
   };
 
   const isToday = (date) => date && isSameDay(date, today);
@@ -110,8 +111,10 @@ export default function StudentPanel() {
 
   const selectedDayIndex = jsDayToIndex(selectedDate.getDay());
   const selectedDateStr = formatDate(selectedDate);
-  const dayRoutine = allRoutines.find(r => r.date === selectedDateStr);
-  const dayMeal = allMeals.find(m => m.date === selectedDateStr);
+  const dayRoutine = allRoutines.find(r => r.date === selectedDateStr)
+    || allRoutines.find(r => r.date === null && r.day_of_week === selectedDayIndex);
+  const dayMeal = allMeals.find(m => m.date === selectedDateStr)
+    || allMeals.find(m => m.date === null && m.day_of_week === selectedDayIndex);
 
   const calendarDays = buildCalendar();
 

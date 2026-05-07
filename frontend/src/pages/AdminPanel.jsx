@@ -43,10 +43,12 @@ export default function AdminPanel() {
   // Routine form
   const [routineForm, setRoutineForm] = useState({ title: '', exercises: [], notes: '' });
   const [showRoutineForm, setShowRoutineForm] = useState(false);
+  const [routineWeekly, setRoutineWeekly] = useState(false);
 
   // Meal form
   const [mealForm, setMealForm] = useState({ meals: [], notes: '' });
   const [showMealForm, setShowMealForm] = useState(false);
+  const [mealWeekly, setMealWeekly] = useState(false);
 
 
   const showToast = (message, type = 'success') => {
@@ -129,7 +131,10 @@ export default function AdminPanel() {
     e.preventDefault();
     try {
       const dayIdx = jsDayToIndex(new Date(selectedDate + 'T12:00:00').getDay());
-      await api.saveRoutine(selectedStudent.id, { date: selectedDate, day_of_week: dayIdx, ...routineForm });
+      const payload = routineWeekly
+        ? { day_of_week: dayIdx, date: null, ...routineForm }
+        : { date: selectedDate, day_of_week: dayIdx, ...routineForm };
+      await api.saveRoutine(selectedStudent.id, payload);
       fetchStudentData(selectedStudent.id);
       setShowRoutineForm(false);
       showToast('Rutina guardada');
@@ -167,7 +172,10 @@ export default function AdminPanel() {
     e.preventDefault();
     try {
       const dayIdx = jsDayToIndex(new Date(selectedDate + 'T12:00:00').getDay());
-      await api.saveMealPlan(selectedStudent.id, { date: selectedDate, day_of_week: dayIdx, ...mealForm });
+      const payload = mealWeekly
+        ? { day_of_week: dayIdx, date: null, ...mealForm }
+        : { date: selectedDate, day_of_week: dayIdx, ...mealForm };
+      await api.saveMealPlan(selectedStudent.id, payload);
       fetchStudentData(selectedStudent.id);
       setShowMealForm(false);
       showToast('Plan nutricional guardado');
@@ -225,11 +233,13 @@ export default function AdminPanel() {
 
   const openRoutineEdit = (r) => {
     setRoutineForm({ title: r ? r.title : '', exercises: r ? r.exercises : [], notes: r ? (r.notes || '') : '' });
+    setRoutineWeekly(r ? r.date === null : false);
     setShowRoutineForm(true);
   };
 
   const openMealEdit = (m) => {
     setMealForm({ meals: m ? m.meals : [], notes: m ? (m.notes || '') : '' });
+    setMealWeekly(m ? m.date === null : false);
     setShowMealForm(true);
   };
 
@@ -376,13 +386,18 @@ export default function AdminPanel() {
             return days;
           };
           const calDays = buildAdminCal();
-          const dayRoutine = routines.find(r => r.date === selectedDate);
-          const dayMeal = mealPlans.find(m => m.date === selectedDate);
-          
+          const selectedDayIdx = jsDayToIndex(new Date(selectedDate + 'T12:00:00').getDay());
+          const dayRoutine = routines.find(r => r.date === selectedDate)
+            || routines.find(r => r.date === null && r.day_of_week === selectedDayIdx);
+          const dayMeal = mealPlans.find(m => m.date === selectedDate)
+            || mealPlans.find(m => m.date === null && m.day_of_week === selectedDayIdx);
+
           const hasContent = (date) => {
             if (!date) return false;
             const dStr = formatDate(date);
-            return routines.some(r => r.date === dStr) || mealPlans.some(m => m.date === dStr);
+            const dIdx = jsDayToIndex(date.getDay());
+            return routines.some(r => r.date === dStr || (r.date === null && r.day_of_week === dIdx))
+              || mealPlans.some(m => m.date === dStr || (m.date === null && m.day_of_week === dIdx));
           };
           const isToday = (date) => date && isSameDay(date, today);
 
@@ -472,6 +487,7 @@ export default function AdminPanel() {
                             <div className="card routine-card">
                               <div className="routine-header">
                                 <h3>{dayRoutine.title}</h3>
+                                {dayRoutine.date === null && <span className="badge-weekly">🔁 Semanal</span>}
                                 <button className="btn btn-ghost btn-sm" onClick={() => handleDeleteRoutine(dayRoutine.id)}>🗑️</button>
                               </div>
                               {dayRoutine.exercises.length > 0 && (
@@ -507,6 +523,7 @@ export default function AdminPanel() {
                             <div className="card meal-card">
                               <div className="routine-header">
                                 <h3>Plan del día</h3>
+                                {dayMeal.date === null && <span className="badge-weekly">🔁 Semanal</span>}
                                 <button className="btn btn-ghost btn-sm" onClick={() => handleDeleteMeal(dayMeal.id)}>🗑️</button>
                               </div>
                               {dayMeal.meals.length > 0 && (
@@ -598,7 +615,9 @@ export default function AdminPanel() {
       )}
 
       {/* Routine Modal */}
-      {showRoutineForm && (
+      {showRoutineForm && (() => {
+        const modalDayName = DAYS[jsDayToIndex(new Date(selectedDate + 'T12:00:00').getDay())];
+        return (
         <div className="modal-overlay" onClick={() => setShowRoutineForm(false)}>
           <div className="modal-content modal-wide" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -607,6 +626,17 @@ export default function AdminPanel() {
             </div>
             <form onSubmit={handleSaveRoutine}>
               <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Frecuencia</label>
+                  <div className="plan-type-selector">
+                    <button type="button" className={`plan-type-btn ${!routineWeekly ? 'plan-type-btn--active' : ''}`} onClick={() => setRoutineWeekly(false)}>
+                      <span>📅</span><span>Solo este {modalDayName.toLowerCase()}</span>
+                    </button>
+                    <button type="button" className={`plan-type-btn ${routineWeekly ? 'plan-type-btn--active' : ''}`} onClick={() => setRoutineWeekly(true)}>
+                      <span>🔁</span><span>Todos los {modalDayName.toLowerCase()}s</span>
+                    </button>
+                  </div>
+                </div>
                 <div className="form-group">
                   <label className="form-label">Título</label>
                   <input className="form-input" value={routineForm.title} onChange={e => setRoutineForm(p => ({...p, title: e.target.value}))} required placeholder="Ej: Tren Superior" />
@@ -636,10 +666,13 @@ export default function AdminPanel() {
             </form>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Meal Modal */}
-      {showMealForm && (
+      {showMealForm && (() => {
+        const modalDayName = DAYS[jsDayToIndex(new Date(selectedDate + 'T12:00:00').getDay())];
+        return (
         <div className="modal-overlay" onClick={() => setShowMealForm(false)}>
           <div className="modal-content modal-wide" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -648,6 +681,17 @@ export default function AdminPanel() {
             </div>
             <form onSubmit={handleSaveMeal}>
               <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Frecuencia</label>
+                  <div className="plan-type-selector">
+                    <button type="button" className={`plan-type-btn ${!mealWeekly ? 'plan-type-btn--active' : ''}`} onClick={() => setMealWeekly(false)}>
+                      <span>📅</span><span>Solo este {modalDayName.toLowerCase()}</span>
+                    </button>
+                    <button type="button" className={`plan-type-btn ${mealWeekly ? 'plan-type-btn--active' : ''}`} onClick={() => setMealWeekly(true)}>
+                      <span>🔁</span><span>Todos los {modalDayName.toLowerCase()}s</span>
+                    </button>
+                  </div>
+                </div>
                 {mealForm.meals.map((meal, i) => (
                   <div key={i} className="meal-form-row">
                     <div className="meal-form-top">
@@ -684,7 +728,8 @@ export default function AdminPanel() {
             </form>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Toast */}
       {toast && (
