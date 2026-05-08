@@ -87,7 +87,9 @@ export default function StudentPanel() {
     if (!date) return false;
     const dStr = formatDate(date);
     const dIdx = jsDayToIndex(date.getDay());
+    const hasDailyMeal = allMeals.some(m => m.date === null && m.day_of_week === 7);
     return allRoutines.some(r => r.date === dStr || (r.date === null && r.day_of_week === dIdx)) ||
+           hasDailyMeal ||
            allMeals.some(m => m.date === dStr || (m.date === null && m.day_of_week === dIdx));
   };
 
@@ -114,7 +116,8 @@ export default function StudentPanel() {
   const dayRoutine = allRoutines.find(r => r.date === selectedDateStr)
     || allRoutines.find(r => r.date === null && r.day_of_week === selectedDayIndex);
   const dayMeal = allMeals.find(m => m.date === selectedDateStr)
-    || allMeals.find(m => m.date === null && m.day_of_week === selectedDayIndex);
+    || allMeals.find(m => m.date === null && m.day_of_week === selectedDayIndex)
+    || allMeals.find(m => m.date === null && m.day_of_week === 7);
 
   const calendarDays = buildCalendar();
 

@@ -49,6 +49,7 @@ export default function AdminPanel() {
   const [mealForm, setMealForm] = useState({ meals: [], notes: '' });
   const [showMealForm, setShowMealForm] = useState(false);
   const [mealWeekly, setMealWeekly] = useState(false);
+  const [mealDaily, setMealDaily] = useState(false);
 
 
   const showToast = (message, type = 'success') => {
@@ -172,7 +173,9 @@ export default function AdminPanel() {
     e.preventDefault();
     try {
       const dayIdx = jsDayToIndex(new Date(selectedDate + 'T12:00:00').getDay());
-      const payload = mealWeekly
+      const payload = mealDaily
+        ? { day_of_week: 7, date: null, ...mealForm }
+        : mealWeekly
         ? { day_of_week: dayIdx, date: null, ...mealForm }
         : { date: selectedDate, day_of_week: dayIdx, ...mealForm };
       await api.saveMealPlan(selectedStudent.id, payload);
@@ -239,7 +242,8 @@ export default function AdminPanel() {
 
   const openMealEdit = (m) => {
     setMealForm({ meals: m ? m.meals : [], notes: m ? (m.notes || '') : '' });
-    setMealWeekly(m ? m.date === null : false);
+    setMealDaily(m ? m.day_of_week === 7 : false);
+    setMealWeekly(m ? (m.date === null && m.day_of_week !== 7) : false);
     setShowMealForm(true);
   };
 
@@ -390,13 +394,16 @@ export default function AdminPanel() {
           const dayRoutine = routines.find(r => r.date === selectedDate)
             || routines.find(r => r.date === null && r.day_of_week === selectedDayIdx);
           const dayMeal = mealPlans.find(m => m.date === selectedDate)
-            || mealPlans.find(m => m.date === null && m.day_of_week === selectedDayIdx);
+            || mealPlans.find(m => m.date === null && m.day_of_week === selectedDayIdx)
+            || mealPlans.find(m => m.date === null && m.day_of_week === 7);
 
           const hasContent = (date) => {
             if (!date) return false;
             const dStr = formatDate(date);
             const dIdx = jsDayToIndex(date.getDay());
+            const hasDailyMeal = mealPlans.some(m => m.date === null && m.day_of_week === 7);
             return routines.some(r => r.date === dStr || (r.date === null && r.day_of_week === dIdx))
+              || hasDailyMeal
               || mealPlans.some(m => m.date === dStr || (m.date === null && m.day_of_week === dIdx));
           };
           const isToday = (date) => date && isSameDay(date, today);
@@ -523,7 +530,8 @@ export default function AdminPanel() {
                             <div className="card meal-card">
                               <div className="routine-header">
                                 <h3>Plan del día</h3>
-                                {dayMeal.date === null && <span className="badge-weekly">🔁 Semanal</span>}
+                                {dayMeal.date === null && dayMeal.day_of_week === 7 && <span className="badge-weekly">🔁 Diario</span>}
+                                {dayMeal.date === null && dayMeal.day_of_week !== 7 && <span className="badge-weekly">🔁 Semanal</span>}
                                 <button className="btn btn-ghost btn-sm" onClick={() => handleDeleteMeal(dayMeal.id)}>🗑️</button>
                               </div>
                               {dayMeal.meals.length > 0 && (
@@ -684,11 +692,14 @@ export default function AdminPanel() {
                 <div className="form-group">
                   <label className="form-label">Frecuencia</label>
                   <div className="plan-type-selector">
-                    <button type="button" className={`plan-type-btn ${!mealWeekly ? 'plan-type-btn--active' : ''}`} onClick={() => setMealWeekly(false)}>
+                    <button type="button" className={`plan-type-btn ${!mealWeekly && !mealDaily ? 'plan-type-btn--active' : ''}`} onClick={() => { setMealWeekly(false); setMealDaily(false); }}>
                       <span>📅</span><span>Solo este {modalDayName.toLowerCase()}</span>
                     </button>
-                    <button type="button" className={`plan-type-btn ${mealWeekly ? 'plan-type-btn--active' : ''}`} onClick={() => setMealWeekly(true)}>
+                    <button type="button" className={`plan-type-btn ${mealWeekly ? 'plan-type-btn--active' : ''}`} onClick={() => { setMealWeekly(true); setMealDaily(false); }}>
                       <span>🔁</span><span>Todos los {modalDayName.toLowerCase()}s</span>
+                    </button>
+                    <button type="button" className={`plan-type-btn ${mealDaily ? 'plan-type-btn--active' : ''}`} onClick={() => { setMealDaily(true); setMealWeekly(false); }}>
+                      <span>📆</span><span>Todos los días</span>
                     </button>
                   </div>
                 </div>
