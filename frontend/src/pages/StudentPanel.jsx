@@ -123,6 +123,13 @@ export default function StudentPanel() {
 
   return (
     <div className="student-layout">
+      {/* Watermark — nombre del alumno como marca de agua anti-captura */}
+      <div className="watermark-overlay" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i} className="watermark-text">{user?.name || ''}</span>
+        ))}
+      </div>
+
       {/* Header */}
       <header className="student-header">
         <div className="container student-header-inner">
