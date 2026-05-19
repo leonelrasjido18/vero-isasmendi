@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
+import ScreenProtection from './ScreenProtection';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
@@ -34,6 +35,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScreenProtection />
         <AppRoutes />
       </AuthProvider>
     </BrowserRouter>
