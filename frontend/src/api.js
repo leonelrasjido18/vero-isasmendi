@@ -127,23 +127,84 @@ export const uploadMealImage = (userId, formData) => {
   }).then(handleResponse);
 };
 
-// Images
-export const getImages = (userId) =>
-  fetch(`${API_BASE}/images/user/${userId}`, {
+// Routine Templates
+export const getRoutineTemplates = () =>
+  fetch(`${API_BASE}/routines/templates/all`, { headers: getHeaders() }).then(handleResponse);
+
+export const saveRoutineTemplate = (data) =>
+  fetch(`${API_BASE}/routines/templates`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const deleteRoutineTemplate = (id) =>
+  fetch(`${API_BASE}/routines/templates/${id}`, {
+    method: 'DELETE',
     headers: getHeaders(),
   }).then(handleResponse);
 
-export const uploadImage = (userId, formData) => {
+// Meal Templates
+export const getMealTemplates = () =>
+  fetch(`${API_BASE}/meals/templates/all`, { headers: getHeaders() }).then(handleResponse);
+
+export const saveMealTemplate = (data) =>
+  fetch(`${API_BASE}/meals/templates`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const deleteMealTemplate = (id) =>
+  fetch(`${API_BASE}/meals/templates/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  }).then(handleResponse);
+
+// Exercise Library
+export const getExercises = () =>
+  fetch(`${API_BASE}/exercises`, { headers: getHeaders() }).then(handleResponse);
+
+export const saveExercise = (data) =>
+  fetch(`${API_BASE}/exercises`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const deleteExercise = (id) =>
+  fetch(`${API_BASE}/exercises/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  }).then(handleResponse);
+
+// Daily Logs
+export const getDailyLog = (userId, date) =>
+  fetch(`${API_BASE}/logs/user/${userId}/date/${date}`, { headers: getHeaders() }).then(handleResponse);
+
+export const saveDailyLog = (userId, data) =>
+  fetch(`${API_BASE}/logs/user/${userId}`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+// Check-ins
+export const getCheckins = (userId) =>
+  fetch(`${API_BASE}/checkins/user/${userId}`, { headers: getHeaders() }).then(handleResponse);
+
+export const saveCheckin = (userId, data) =>
+  fetch(`${API_BASE}/checkins/user/${userId}`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const uploadCheckinPhotos = (userId, formData) => {
   const token = localStorage.getItem('vi_token');
-  return fetch(`${API_BASE}/images/user/${userId}`, {
+  return fetch(`${API_BASE}/checkins/upload/${userId}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
   }).then(handleResponse);
 };
-
-export const deleteImage = (id) =>
-  fetch(`${API_BASE}/images/${id}`, {
-    method: 'DELETE',
-    headers: getHeaders(),
-  }).then(handleResponse);

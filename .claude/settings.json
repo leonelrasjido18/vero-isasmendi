@@ -11,7 +11,8 @@
       "Bash(node server.js)",
       "Bash(echo \"EXIT: $?\")",
       "Bash(netstat -ano)",
-      "Bash(node generate-icons.mjs)"
+      "Bash(node generate-icons.mjs)",
+      "Bash(npm run:*)"
     ]
   }
 }

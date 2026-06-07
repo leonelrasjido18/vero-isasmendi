@@ -155,4 +155,61 @@ router.delete('/:id', authMiddleware, adminMiddleware, (req, res) => {
   }
 });
 
+// Get all meal templates (admin only)
+router.get('/templates/all', authMiddleware, adminMiddleware, (req, res) => {
+  try {
+    let templates = db.prepare('SELECT * FROM meal_templates ORDER BY title').all();
+    templates = templates.map(t => ({
+      ...t,
+      meals: JSON.parse(t.meals || '[]')
+    }));
+    res.json(templates);
+  } catch (error) {
+    console.error('Get meal templates error:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// Create or update meal template (admin only)
+router.post('/templates', authMiddleware, adminMiddleware, (req, res) => {
+  try {
+    const { id, title, meals, notes } = req.body;
+    if (!title) return res.status(400).json({ error: 'Título es requerido' });
+
+    if (id) {
+      db.prepare(`
+        UPDATE meal_templates SET title = ?, meals = ?, notes = ?
+        WHERE id = ?
+      `).run(title, JSON.stringify(meals || []), notes || null, id);
+      const updated = db.prepare('SELECT * FROM meal_templates WHERE id = ?').get(id);
+      return res.json({ ...updated, meals: JSON.parse(updated.meals) });
+    }
+
+    const result = db.prepare(`
+      INSERT INTO meal_templates (title, meals, notes)
+      VALUES (?, ?, ?)
+    `).run(title, JSON.stringify(meals || []), notes || null);
+    const template = db.prepare('SELECT * FROM meal_templates WHERE id = ?').get(result.lastInsertRowid);
+    res.status(201).json({ ...template, meals: JSON.parse(template.meals) });
+  } catch (error) {
+    console.error('Create meal template error:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// Delete meal template (admin only)
+router.delete('/templates/:id', authMiddleware, adminMiddleware, (req, res) => {
+  try {
+    const { id } = req.params;
+    const template = db.prepare('SELECT id FROM meal_templates WHERE id = ?').get(id);
+    if (!template) return res.status(404).json({ error: 'Plantilla no encontrada' });
+
+    db.prepare('DELETE FROM meal_templates WHERE id = ?').run(id);
+    res.json({ message: 'Plantilla eliminada' });
+  } catch (error) {
+    console.error('Delete meal template error:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 module.exports = router;

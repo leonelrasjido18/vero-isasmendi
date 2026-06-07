@@ -16,13 +16,17 @@ const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/students');
 const routineRoutes = require('./routes/routines');
 const mealRoutes = require('./routes/meals');
-const imageRoutes = require('./routes/images');
+const exerciseRoutes = require('./routes/exercises');
+const checkinRoutes = require('./routes/checkins');
+const logRoutes = require('./routes/logs');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/routines', routineRoutes);
 app.use('/api/meals', mealRoutes);
-app.use('/api/images', imageRoutes);
+app.use('/api/exercises', exerciseRoutes);
+app.use('/api/checkins', checkinRoutes);
+app.use('/api/logs', logRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
