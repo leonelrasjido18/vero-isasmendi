@@ -32,6 +32,7 @@ export default function AdminPanel() {
   const [calViewYear, setCalViewYear] = useState(today.getFullYear());
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [lightboxImg, setLightboxImg] = useState(null);
 
   // Exercise Library state
   const [exerciseLibrary, setExerciseLibrary] = useState([]);
@@ -135,10 +136,10 @@ export default function AdminPanel() {
       setSelectedStudentDailyLog(log);
       try {
         setStudentLogMap(JSON.parse(log.exercise_logs || '{}'));
-      } catch (e) {
+      } catch {
         setStudentLogMap({});
       }
-    } catch (err) {
+    } catch {
       setSelectedStudentDailyLog(null);
       setStudentLogMap({});
     }
