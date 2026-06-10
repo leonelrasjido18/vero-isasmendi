@@ -66,6 +66,17 @@ export default function StudentPanel() {
   const [selectedExerciseInfo, setSelectedExerciseInfo] = useState(null);
   const [lightboxImg, setLightboxImg] = useState(null);
   const [confetiActive, setConfetiActive] = useState(false);
+  const [expandedCargas, setExpandedCargas] = useState({});
+
+  const toggleCargas = (exerciseName, initiallyExpanded) => {
+    setExpandedCargas(prev => {
+      const currentVal = prev[exerciseName] ?? initiallyExpanded;
+      return {
+        ...prev,
+        [exerciseName]: !currentVal
+      };
+    });
+  };
 
   // Rest Timer States
   const [timerOpen, setTimerOpen] = useState(false);
@@ -726,6 +737,8 @@ export default function StudentPanel() {
                                                 const setsCount = parseInt(ex.sets) || 1;
                                                 const libraryMatch = getExerciseLibraryMatch(ex.name);
                                                 const loggedSets = exerciseLogsMap[ex.name] || [];
+                                                const hasLoggedData = loggedSets.some(set => set.reps || set.weight || set.completed);
+                                                const isExpanded = expandedCargas[ex.name] ?? hasLoggedData;
                                                 
                                                 return (
                                                   <div key={ex.originalIndex} className="student-exercise combined-item">
@@ -742,40 +755,48 @@ export default function StudentPanel() {
                                                       <div className="student-exercise-meta">
                                                         {ex.sets && <span className="meta-tag">{ex.sets} series</span>}
                                                         {ex.reps && <span className="meta-tag">{ex.reps} reps</span>}
+                                                        <button 
+                                                          className={`btn-cargar-peso ${isExpanded ? 'active' : ''}`}
+                                                          onClick={() => toggleCargas(ex.name, hasLoggedData)}
+                                                        >
+                                                          {isExpanded ? 'Ocultar peso' : '🏋️ Cargar peso'}
+                                                        </button>
                                                         {ex.notes && <p className="student-exercise-notes">{ex.notes}</p>}
                                                       </div>
 
                                                       {/* Set Inputs for Cargas */}
-                                                      <div className="sets-log-table">
-                                                        {Array.from({ length: setsCount }).map((_, sIdx) => {
-                                                          const setLog = loggedSets[sIdx] || { reps: '', weight: '', completed: false };
-                                                          return (
-                                                            <div key={sIdx} className={`set-row ${setLog.completed ? 'completed' : ''}`}>
-                                                              <span className="set-num">S{sIdx + 1}</span>
-                                                              <input 
-                                                                type="number" 
-                                                                placeholder="reps" 
-                                                                inputMode="decimal"
-                                                                value={setLog.reps}
-                                                                onChange={(e) => handleSetLogChange(ex.name, sIdx, 'reps', e.target.value)}
-                                                              />
-                                                              <span className="x-char">x</span>
-                                                              <input 
-                                                                type="text" 
-                                                                placeholder="kg / lb" 
-                                                                value={setLog.weight}
-                                                                onChange={(e) => handleSetLogChange(ex.name, sIdx, 'weight', e.target.value)}
-                                                              />
-                                                              <button 
-                                                                className={`btn-set-check ${setLog.completed ? 'checked' : ''}`}
-                                                                onClick={() => handleToggleSetCompleted(ex.name, sIdx)}
-                                                              >
-                                                                ✔
-                                                              </button>
-                                                            </div>
-                                                          );
-                                                        })}
-                                                      </div>
+                                                      {isExpanded && (
+                                                        <div className="sets-log-table">
+                                                          {Array.from({ length: setsCount }).map((_, sIdx) => {
+                                                            const setLog = loggedSets[sIdx] || { reps: '', weight: '', completed: false };
+                                                            return (
+                                                              <div key={sIdx} className={`set-row ${setLog.completed ? 'completed' : ''}`}>
+                                                                <span className="set-num">S{sIdx + 1}</span>
+                                                                <input 
+                                                                  type="number" 
+                                                                  placeholder="reps" 
+                                                                  inputMode="decimal"
+                                                                  value={setLog.reps}
+                                                                  onChange={(e) => handleSetLogChange(ex.name, sIdx, 'reps', e.target.value)}
+                                                                />
+                                                                <span className="x-char">x</span>
+                                                                <input 
+                                                                  type="text" 
+                                                                  placeholder="kg / lb" 
+                                                                  value={setLog.weight}
+                                                                  onChange={(e) => handleSetLogChange(ex.name, sIdx, 'weight', e.target.value)}
+                                                                />
+                                                                <button 
+                                                                  className={`btn-set-check ${setLog.completed ? 'checked' : ''}`}
+                                                                  onClick={() => handleToggleSetCompleted(ex.name, sIdx)}
+                                                                >
+                                                                  ✔
+                                                                </button>
+                                                              </div>
+                                                            );
+                                                          })}
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
                                                 );
@@ -787,6 +808,8 @@ export default function StudentPanel() {
                                           const setsCount = parseInt(ex.sets) || 1;
                                           const libraryMatch = getExerciseLibraryMatch(ex.name);
                                           const loggedSets = exerciseLogsMap[ex.name] || [];
+                                          const hasLoggedData = loggedSets.some(set => set.reps || set.weight || set.completed);
+                                          const isExpanded = expandedCargas[ex.name] ?? hasLoggedData;
 
                                           return (
                                             <div key={ex.originalIndex} className="student-exercise">
@@ -804,11 +827,18 @@ export default function StudentPanel() {
                                                 <div className="student-exercise-meta">
                                                   {ex.sets && <span className="meta-tag">{ex.sets} series</span>}
                                                   {ex.reps && <span className="meta-tag">{ex.reps} reps</span>}
+                                                  <button 
+                                                    className={`btn-cargar-peso ${isExpanded ? 'active' : ''}`}
+                                                    onClick={() => toggleCargas(ex.name, hasLoggedData)}
+                                                  >
+                                                    {isExpanded ? 'Ocultar peso' : '🏋️ Cargar peso'}
+                                                  </button>
                                                   {ex.notes && <p className="student-exercise-notes">{ex.notes}</p>}
                                                 </div>
 
                                                 {/* Set Inputs for Cargas */}
-                                                <div className="sets-log-table">
+                                                {isExpanded && (
+                                                  <div className="sets-log-table">
                                                   {Array.from({ length: setsCount }).map((_, sIdx) => {
                                                     const setLog = loggedSets[sIdx] || { reps: '', weight: '', completed: false };
                                                     return (
@@ -838,6 +868,7 @@ export default function StudentPanel() {
                                                     );
                                                   })}
                                                 </div>
+                                                )}
                                               </div>
                                             </div>
                                           );

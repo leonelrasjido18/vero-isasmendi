@@ -810,6 +810,36 @@
   background: rgba(76, 175, 80, 0.05);
 }
 
+/* ========== Button Cargar Peso ========== */
+.btn-cargar-peso {
+  padding: 0.18rem 0.6rem;
+  background: transparent;
+  border: 1px solid var(--text-accent);
+  border-radius: 999px;
+  font-size: 0.73rem;
+  color: var(--text-accent);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.btn-cargar-peso:hover {
+  background: rgba(196, 149, 106, 0.15);
+  transform: scale(1.02);
+}
+
+.btn-cargar-peso.active {
+  background: var(--text-accent);
+  color: #0a0a0a;
+}
+
+.btn-cargar-peso.active:hover {
+  background: var(--rose-gold-light);
+}
+
 /* ========== Floating Rest Timer ========== */
 .floating-timer {
   position: fixed;
