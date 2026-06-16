@@ -54,6 +54,7 @@ export default function StudentPanel() {
   // Checkins & Progress States
   const [checkinsList, setCheckinsList] = useState([]);
   const [checkinForm, setCheckinForm] = useState({
+    date: formatDate(new Date()),
     weight: '', waist: '', hip: '', thigh: '',
     photo_front: '', photo_side: '', photo_back: '', notes: ''
   });
@@ -224,6 +225,24 @@ export default function StudentPanel() {
       setExerciseLibrary(exLib);
       setCheckinsList(checkins);
       
+      const todayStr = formatDate(new Date());
+      const existingToday = checkins.find(c => c.date === todayStr);
+      if (existingToday) {
+        setCheckinForm({
+          date: todayStr,
+          weight: existingToday.weight !== null ? existingToday.weight.toString() : '',
+          waist: existingToday.waist !== null ? existingToday.waist.toString() : '',
+          hip: existingToday.hip !== null ? existingToday.hip.toString() : '',
+          thigh: existingToday.thigh !== null ? existingToday.thigh.toString() : '',
+          photo_front: existingToday.photo_front || '',
+          photo_side: existingToday.photo_side || '',
+          photo_back: existingToday.photo_back || '',
+          notes: existingToday.notes || ''
+        });
+      } else {
+        setCheckinForm(prev => ({ ...prev, date: todayStr }));
+      }
+
       // Auto fill comparison dropdowns with newest checkins
       if (checkins.length > 0) {
         setPhotoCompareA(checkins[checkins.length - 1].id.toString());
@@ -397,6 +416,33 @@ export default function StudentPanel() {
     }
   };
 
+  const handleCheckinDateChange = (newDate) => {
+    setCheckinForm(prev => {
+      const existing = checkinsList.find(c => c.date === newDate);
+      if (existing) {
+        return {
+          ...prev,
+          date: newDate,
+          weight: existing.weight !== null ? existing.weight.toString() : '',
+          waist: existing.waist !== null ? existing.waist.toString() : '',
+          hip: existing.hip !== null ? existing.hip.toString() : '',
+          thigh: existing.thigh !== null ? existing.thigh.toString() : '',
+          photo_front: existing.photo_front || '',
+          photo_side: existing.photo_side || '',
+          photo_back: existing.photo_back || '',
+          notes: existing.notes || ''
+        };
+      } else {
+        return {
+          ...prev,
+          date: newDate,
+          weight: '', waist: '', hip: '', thigh: '',
+          photo_front: '', photo_side: '', photo_back: '', notes: ''
+        };
+      }
+    });
+  };
+
   const handleSaveCheckin = async (e) => {
     e.preventDefault();
     if (!navigator.onLine) {
@@ -405,7 +451,7 @@ export default function StudentPanel() {
     }
 
     try {
-      const dateStr = formatDate(today);
+      const dateStr = checkinForm.date || formatDate(today);
       const payload = {
         date: dateStr,
         weight: checkinForm.weight ? parseFloat(checkinForm.weight) : null,
@@ -421,8 +467,9 @@ export default function StudentPanel() {
       await api.saveCheckin(user.id, payload);
       showToast('Reporte de progreso guardado con éxito! 💪');
       
-      // Clear form
+      // Clear form and reset to today
       setCheckinForm({
+        date: formatDate(new Date()),
         weight: '', waist: '', hip: '', thigh: '',
         photo_front: '', photo_side: '', photo_back: '', notes: ''
       });
@@ -430,6 +477,12 @@ export default function StudentPanel() {
       // Reload checkins
       const checkins = await api.getCheckins(user.id);
       setCheckinsList(checkins);
+
+      // Auto fill comparison dropdowns with newest checkins
+      if (checkins.length > 0) {
+        setPhotoCompareA(checkins[checkins.length - 1].id.toString());
+        setPhotoCompareB(checkins[0].id.toString());
+      }
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -1015,8 +1068,23 @@ export default function StudentPanel() {
 
                 {/* Register checkin form */}
                 <div className="progress-card form-card">
-                  <h3>Cargar Reporte de Hoy</h3>
+                  <h3>Cargar Reporte de Progreso / Estado Inicial</h3>
                   <form onSubmit={handleSaveCheckin}>
+                    <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                      <label className="form-label">Fecha del Reporte</label>
+                      <input 
+                        type="date" 
+                        value={checkinForm.date} 
+                        onChange={e => handleCheckinDateChange(e.target.value)}
+                        required
+                        className="form-input"
+                        style={{ textAlign: 'left', width: '100%' }}
+                      />
+                      <small className="photo-upload-hint" style={{ marginTop: '0.4rem', display: 'block' }}>
+                        * Si estás cargando tu estado inicial ("el antes"), selecciona la fecha en la que comenzaste. Los datos y fotos se guardarán para ese día.
+                      </small>
+                    </div>
+
                     <div className="form-row">
                       <div className="form-group-half">
                         <label>Peso (kg)</label>
@@ -1142,13 +1210,14 @@ export default function StudentPanel() {
                       </div>
                     </div>
 
-                    <div className="form-group">
-                      <label>Notas adicionales</label>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
+                      <label className="form-label">Notas adicionales</label>
                       <textarea 
+                        className="form-input"
                         placeholder="¿Cómo te has sentido esta semana en general?" 
                         value={checkinForm.notes} 
                         onChange={e => setCheckinForm(p => ({ ...p, notes: e.target.value }))}
-                        rows={2}
+                        rows={3}
                       />
                     </div>
 
